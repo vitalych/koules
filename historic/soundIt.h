@@ -5,14 +5,14 @@
    Feel free to use/distribute/modify as long as proper credits
    are included.
 */
- 
+
 /* Designed for digital sound effects in interactive apps (games, drum
    machines, digital organs, ???)
 
    Will mix channels of mono 8-bit raw samples, & play back in "real-time".
    Each channel can only play one sample at a time, but all
-   channels can play a different sample simultaneously.                 
-   
+   channels can play a different sample simultaneously.
+
    If you have sox, use the ' -t .ub ' option to make samples
    that this library will play properly.
 
@@ -21,8 +21,8 @@
 #ifndef SOUNDIT_VERS
 #define SOUNDIT_VERS "0.04"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* 00002 = 2 fragments   */
 /* 00007 = means each fragment is 2^7 or 128 bytes */
@@ -30,24 +30,20 @@
 #define FRAG_SPEC 0x00020007
 
 /*==========================================================================*/
-struct Sample
-    {
-    unsigned char *data;	/* unsigned 8-bit raw samples */
-    int len;			/* length of sample in bytes  */
-    };
+struct Sample {
+    unsigned char *data; /* unsigned 8-bit raw samples */
+    int len;             /* length of sample in bytes  */
+};
 
 typedef struct Sample Sample;
 
 /*==========================================================================*/
-/* given the name of a .raw sound file, load it into the Sample struct */ 
+/* given the name of a .raw sound file, load it into the Sample struct */
 /* pointed to by 'sample'                                              */
-int 
-Snd_loadRawSample( const char *file, Sample *sample );
+int Snd_loadRawSample(const char *file, Sample *sample);
 
 /* also load .au files */
-int 
-Snd_loadUlawSample( const char *file, Sample *sample );
-
+int Snd_loadUlawSample(const char *file, Sample *sample);
 
 /*==========================================================================*/
 /* init sound device, etc..                                                 */
@@ -57,30 +53,21 @@ Snd_loadUlawSample( const char *file, Sample *sample );
 /* channels = # of channels to mix                                          */
 /* sound_device = a char string for the sound device, eg, "/dev/dsp"        */
 /* returns: 0=success, -1=failure.*/
-int 
-Snd_init( int num_snd, const Sample *sa, int freq, 
-          int channels, const char *sound_device );
-
+int Snd_init(int num_snd, const Sample *sa, int freq, int channels, const char *sound_device);
 
 /* shutdown sample player, free mem, etc/etc..*/
-int 
-Snd_restore();
-
+int Snd_restore();
 
 /* play a sound effect in the given channel 1..n*/
 /* volume = integers from 0 (off) to 100 (full volume)*/
-int 
-Snd_effect( int nr, int channel );
-
+int Snd_effect(int nr, int channel);
 
 /* stop a channel (1..n) from playing*/
-/*void 
+/*void
 Snd_reset(enum snd_channel channel);*/
-	
 
 /* stop all channels from playing*/
-/*void 
+/*void
 Snd_reset();*/
-	
-	
+
 #endif

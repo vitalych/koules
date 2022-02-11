@@ -4,8 +4,8 @@
 #include <SDL/SDL.h>
 
 typedef struct SDL_Point {
-  Sint16 x;
-  Sint16 y;
+    Sint16 x;
+    Sint16 y;
 } SDL_Point;
 
 extern int SDL_DrawPixel(SDL_Surface *sfc, int x, int y, Uint32 colour);

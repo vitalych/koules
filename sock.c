@@ -7,10 +7,10 @@
 #if defined(__sparc)
 #define __EXTENSIONS__
 #endif
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/param.h>
 #include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/types.h>
+#include <unistd.h>
 #if (SVR4)
 #include <sys/filio.h>
 #endif
@@ -19,17 +19,17 @@
 #else
 #include <sys/time.h>
 #endif
-#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <netdb.h>
-#include <signal.h>
 #include <setjmp.h>
-#include <errno.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
 #if defined(__sparc)
 #include <sys/fcntl.h>
 #endif
@@ -42,48 +42,42 @@
 static struct timeval timeout;
 static struct sockaddr_in lastaddr;
 
-
-void SetTimeout(int s,int us)
-{
-  timeout.tv_sec=s;
-  timeout.tv_usec=us;
+void SetTimeout(int s, int us) {
+    timeout.tv_sec = s;
+    timeout.tv_usec = us;
 }
 
-int GetPortNum(int fd)
-{
-  struct sockaddr_in a;
-  int s=sizeof(a);
-  if(getsockname(fd,(struct sockaddr *)&a,&s)<0) return -1;
-  return(ntohs(a.sin_port));
+int GetPortNum(int fd) {
+    struct sockaddr_in a;
+    int s = sizeof(a);
+    if (getsockname(fd, (struct sockaddr *) &a, &s) < 0)
+        return -1;
+    return (ntohs(a.sin_port));
 }
-char *GetSockAddr(int fd)
-{
-  struct sockaddr_in a;
-  int s=sizeof(a);
-  if(getsockname(fd,(struct sockaddr *)&a,&s)<0) return NULL;
-  return(inet_ntoa(a.sin_addr));
+char *GetSockAddr(int fd) {
+    struct sockaddr_in a;
+    int s = sizeof(a);
+    if (getsockname(fd, (struct sockaddr *) &a, &s) < 0)
+        return NULL;
+    return (inet_ntoa(a.sin_addr));
 }
-int SetSocketReceiveBufferSize(int fd,int size)
-{
-	return(setsockopt(fd, SOL_SOCKET, SO_RCVBUF, (void *)&size, sizeof(size)));
+int SetSocketReceiveBufferSize(int fd, int size) {
+    return (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, (void *) &size, sizeof(size)));
 }
-int SetSocketSendBufferSize(int fd,int size)
-{
-	return(setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (void *)&size, sizeof(size)));
+int SetSocketSendBufferSize(int fd, int size) {
+    return (setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (void *) &size, sizeof(size)));
 }
 
-
-int SetSocketNonBlocking (int fd, int flag)
-{
-/*
- * This code is copied from original socklib library. I hope it is not
- * problem... I want to avoid compilation problems on some systems...
- *
- * There are some problems on some particular systems (suns) with
- * getting sockets to be non-blocking.  Just try all possible ways
- * until one of them succeeds.  Please keep us informed by e-mail
- * to xpilot@cs.uit.no.
- */
+int SetSocketNonBlocking(int fd, int flag) {
+    /*
+     * This code is copied from original socklib library. I hope it is not
+     * problem... I want to avoid compilation problems on some systems...
+     *
+     * There are some problems on some particular systems (suns) with
+     * getting sockets to be non-blocking.  Just try all possible ways
+     * until one of them succeeds.  Please keep us informed by e-mail
+     * to xpilot@cs.uit.no.
+     */
 
 #ifndef USE_FCNTL_O_NONBLOCK
 #ifndef USE_FCNTL_O_NDELAY
@@ -110,136 +104,115 @@ int SetSocketNonBlocking (int fd, int flag)
 #endif
 
 #ifdef USE_FCNTL_FNDELAY
-  if (fcntl (fd, F_SETFL, (flag != 0) ? FNDELAY : 0) != -1)
-    return 0;
-  fprintf (stderr, "fcntl FNDELAY failed in file \"%s\", line %d: %s\n",
-	   __FILE__, __LINE__, strerror (errno));
+    if (fcntl(fd, F_SETFL, (flag != 0) ? FNDELAY : 0) != -1)
+        return 0;
+    fprintf(stderr, "fcntl FNDELAY failed in file \"%s\", line %d: %s\n", __FILE__, __LINE__, strerror(errno));
 #endif
 
 #ifdef USE_IOCTL_FIONBIO
-  if (ioctl (fd, FIONBIO, &flag) != -1)
-    return 0;
-  fprintf (stderr, "ioctl FIONBIO failed in file \"%s\", line %d: %s\n",
-	   __FILE__, __LINE__, strerror (errno));
+    if (ioctl(fd, FIONBIO, &flag) != -1)
+        return 0;
+    fprintf(stderr, "ioctl FIONBIO failed in file \"%s\", line %d: %s\n", __FILE__, __LINE__, strerror(errno));
 #endif
 
 #ifdef USE_FCNTL_O_NONBLOCK
-  if (fcntl (fd, F_SETFL, (flag != 0) ? O_NONBLOCK : 0) != -1)
-    return 0;
-  fprintf (stderr, "fcntl O_NONBLOCK failed in file \"%s\", line %d: %s\n",
-	   __FILE__, __LINE__, strerror (errno));
+    if (fcntl(fd, F_SETFL, (flag != 0) ? O_NONBLOCK : 0) != -1)
+        return 0;
+    fprintf(stderr, "fcntl O_NONBLOCK failed in file \"%s\", line %d: %s\n", __FILE__, __LINE__, strerror(errno));
 #endif
 
 #ifdef USE_FCNTL_O_NDELAY
-  if (fcntl (fd, F_SETFL, (flag != 0) ? O_NDELAY : 0) != -1)
-    return 0;
-  fprintf (stderr, "fcntl O_NDELAY failed in file \"%s\", line %d: %s\n",
-	   __FILE__, __LINE__, strerror (errno));
+    if (fcntl(fd, F_SETFL, (flag != 0) ? O_NDELAY : 0) != -1)
+        return 0;
+    fprintf(stderr, "fcntl O_NDELAY failed in file \"%s\", line %d: %s\n", __FILE__, __LINE__, strerror(errno));
 #endif
 
-  return (-1);
-}	
-
-int GetSocketError(int fd)
-{
-	int size=sizeof(errno);
-	return (getsockopt(fd,SOL_SOCKET,SO_ERROR,(char *)&errno,&size));
+    return (-1);
 }
 
-int SocketReadable(int fd)
-{
-	fd_set fds;
-        FD_ZERO(&fds);
-	FD_SET(fd,&fds);
-	if (select (fd + 1, &fds, NULL, NULL, &timeout) == -1) return ((errno == EINTR) ? 0 : -1);
-	return(FD_ISSET(fd,&fds));
+int GetSocketError(int fd) {
+    int size = sizeof(errno);
+    return (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char *) &errno, &size));
 }
 
-int CreateDgramSocket(int port)
-{
-        struct sockaddr_in addr;
-	int fd;
+int SocketReadable(int fd) {
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(fd, &fds);
+    if (select(fd + 1, &fds, NULL, NULL, &timeout) == -1)
+        return ((errno == EINTR) ? 0 : -1);
+    return (FD_ISSET(fd, &fds));
+}
 
-	fd=socket(AF_INET, SOCK_DGRAM, 0);
-	if (fd<0) return -1;
-	memset(&addr,0,sizeof(addr));
-	addr.sin_addr.s_addr=INADDR_ANY;
-	addr.sin_port=htons(port);
-	addr.sin_family=AF_INET;
-	if(bind(fd,(struct sockaddr *)&addr,sizeof(struct sockaddr_in))<0) {
-			fd=errno;
-			close(fd);
-			errno=fd;
-			return -1;
-			}
-        return fd;
-	  
+int CreateDgramSocket(int port) {
+    struct sockaddr_in addr;
+    int fd;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0)
+        return -1;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_port = htons(port);
+    addr.sin_family = AF_INET;
+    if (bind(fd, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) < 0) {
+        fd = errno;
+        close(fd);
+        errno = fd;
+        return -1;
+    }
+    return fd;
 }
-int DgramConnect(int fd, char *host, int port)
-{
-	struct sockaddr_in addr;
-	memset(&addr,0,sizeof(addr));
-	addr.sin_addr.s_addr = inet_addr (host);
-	if(addr.sin_addr.s_addr==-1) return -1;
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons (port);
-	return(connect (fd, (struct sockaddr *) &addr, sizeof (addr)));
+int DgramConnect(int fd, char *host, int port) {
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_addr.s_addr = inet_addr(host);
+    if (addr.sin_addr.s_addr == -1)
+        return -1;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    return (connect(fd, (struct sockaddr *) &addr, sizeof(addr)));
 }
-int DgramSend(int fd, char *host, int port, char *sbuf, int size)
-{
-	struct sockaddr_in addr;
-	struct hostent *hp;
+int DgramSend(int fd, char *host, int port, char *sbuf, int size) {
+    struct sockaddr_in addr;
+    struct hostent *hp;
 #if 0
 	if (!rand()%10) return 0;/*Internet emulation :))))))) */
 	if (rand()%2) {size=rand()%size;}
 #endif
-	memset(&addr,0,sizeof(addr));
-	addr.sin_addr.s_addr = inet_addr (host);
-	if(addr.sin_addr.s_addr==-1) {
-		if (addr.sin_addr.s_addr == (int) -1)
-		{
-			hp = gethostbyname (host);
-			if (hp == NULL)
-			{
-				fprintf(stderr,"Host '%s' unknown\n",host);
-				return -1;
-			}
-			else
-				addr.sin_addr.s_addr = ((struct in_addr *) (hp->h_addr))->s_addr;
-		}
-
-	}
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons (port);
-        return(sendto (fd, sbuf, size, 0, (struct sockaddr *) &addr,
-		                     sizeof (struct sockaddr_in)));
-
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_addr.s_addr = inet_addr(host);
+    if (addr.sin_addr.s_addr == -1) {
+        if (addr.sin_addr.s_addr == (int) -1) {
+            hp = gethostbyname(host);
+            if (hp == NULL) {
+                fprintf(stderr, "Host '%s' unknown\n", host);
+                return -1;
+            } else
+                addr.sin_addr.s_addr = ((struct in_addr *) (hp->h_addr))->s_addr;
+        }
+    }
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    return (sendto(fd, sbuf, size, 0, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)));
 }
-int DgramReceiveAny(int fd,char *buf, int size)
-{
-	int len=sizeof (struct sockaddr_in);
-	return(recvfrom (fd, buf, size, 0, (struct sockaddr *) &lastaddr, &len));
+int DgramReceiveAny(int fd, char *buf, int size) {
+    int len = sizeof(struct sockaddr_in);
+    return (recvfrom(fd, buf, size, 0, (struct sockaddr *) &lastaddr, &len));
 }
-int DgramReceiveConnected(int fd,char *buf, int size)
-{
-	return(recv (fd, buf, size, 0));
+int DgramReceiveConnected(int fd, char *buf, int size) {
+    return (recv(fd, buf, size, 0));
 }
-int SocketClose (int fd)
-{
-       shutdown (fd, 2);
-       if (close (fd) == -1)
-          {
-	       return (-1);
-          }
-     return (1);
+int SocketClose(int fd) {
+    shutdown(fd, 2);
+    if (close(fd) == -1) {
+        return (-1);
+    }
+    return (1);
 }
-char *DgramLastaddr (void)
-{
-	  return (inet_ntoa (lastaddr.sin_addr));
+char *DgramLastaddr(void) {
+    return (inet_ntoa(lastaddr.sin_addr));
 }
-int DgramLastport (void)
-{
-	  return (ntohs ((int) lastaddr.sin_port));
-} 
-
-
+int DgramLastport(void) {
+    return (ntohs((int) lastaddr.sin_port));
+}

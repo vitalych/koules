@@ -5,16 +5,19 @@
    #define GETLONG(data,long) memcpy(&long,data,4); */
 /*my own ones-faster and shorter than calling library routines..
    why gcc don't inline them? */
-#define PUTCHAR(data,long) *(unsigned char *)(data)=(unsigned char)(long);
-#define GETCHAR(data,long) (long)=*(unsigned char *)(data);
-#define PUTSHORT(data,long) *(unsigned char *)(data)=(unsigned short)(long)&0xff,*((unsigned char *)(data)+1)=((long)>>8)&0xff;
-#define GETSHORT(data,long) long=*(unsigned char *)(data),long+=*((unsigned char *)data+1)<<8;
-#define PUTLONG(data,long) *(unsigned char *)(data)=(unsigned short)(long)&0xff,*((unsigned char *)(data)+1)=((long)>>8)&0xff\
-                                                                               ,*((unsigned char *)(data)+2)=((long)>>16)&0xff\
-                                                                               ,*((unsigned char *)(data)+3)=((long)>>24)&0xff;
-#define GETLONG(data,long) long=*(unsigned char *)(data),long+=*((unsigned char *)data+1)<<8;\
-                                                         long+=*((unsigned char *)data+2)<<16;\
-                                                         long+=*((unsigned char *)data+2)<<24;
+#define PUTCHAR(data, long) *(unsigned char *) (data) = (unsigned char) (long);
+#define GETCHAR(data, long) (long) = *(unsigned char *) (data);
+#define PUTSHORT(data, long) \
+    *(unsigned char *) (data) = (unsigned short) (long) &0xff, *((unsigned char *) (data) + 1) = ((long) >> 8) & 0xff;
+#define GETSHORT(data, long) long = *(unsigned char *) (data), long += *((unsigned char *) data + 1) << 8;
+#define PUTLONG(data, long)                                                                                            \
+    *(unsigned char *) (data) = (unsigned short) (long) &0xff, *((unsigned char *) (data) + 1) = ((long) >> 8) & 0xff, \
+                       *((unsigned char *) (data) + 2) = ((long) >> 16) & 0xff,                                        \
+                       *((unsigned char *) (data) + 3) = ((long) >> 24) & 0xff;
+#define GETLONG(data, long)                                                       \
+    long = *(unsigned char *) (data), long += *((unsigned char *) data + 1) << 8; \
+    long += *((unsigned char *) data + 2) << 16;                                  \
+    long += *((unsigned char *) data + 2) << 24;
 #define HEADSIZE 1
 /* Client messages */
 #define CPRINT 0
@@ -43,12 +46,12 @@
 #define SKEY 9
 #define SRELIABLE 10
 #define SINIT 11
-#define PUTHEAD(long) PUTCHAR(buffer,long);
-#define NETBUFFER (256*16)
+#define PUTHEAD(long) PUTCHAR(buffer, long);
+#define NETBUFFER (256 * 16)
 /*#define INITPACKETSIZE 17 */
 #define INITPACKETSIZE 16
 #define REPLYSIZE 8
 #define DEFAULTINITPORT 12345
-extern int      initport;
+extern int initport;
 #endif
 #endif

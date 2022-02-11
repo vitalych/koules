@@ -5,135 +5,102 @@
  *  Include file dependencies:
  */
 #ifdef RSOUND
-#include <stdio.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <stddef.h>
 #include <ctype.h>
 #include <errno.h>
-#include <sys/stat.h>
+#include <fcntl.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/fcntl.h>
+#include <sys/stat.h>
 
-#include "rplay.h"
 #include <X11/Xlib.h>
 #include "koules.h"
+#include "rplay.h"
 
-char           *unixSoundPath = SOUNDDIR;
+char *unixSoundPath = SOUNDDIR;
 #define playSounds 1
 
 /*
  *  Internal variable declarations:
  */
 
-static char    *FILENAME[] =
-{
-  "/start.au",
-  "/end.au",
-  "/colize.au",
-  "/destroy1.au",
-  "/destroy2.au",
-  "/creator1.au",
-  "/creator2.au"
-};
-#define NUM_SOUNDS      (sizeof(FILENAME)/sizeof(char*))
+static char *FILENAME[] = {"/start.au",    "/end.au",      "/colize.au",  "/destroy1.au",
+                           "/destroy2.au", "/creator1.au", "/creator2.au"};
+#define NUM_SOUNDS (sizeof(FILENAME) / sizeof(char *))
 
+#define MAX_SOUNDS 8
+static int fd;
 
-#define	MAX_SOUNDS	8
-static int      fd;
+static int audio_on = False;
 
-static int      audio_on = False;
+void init_sound() {
+    char *displayname = DisplayString(dp);
+    char host[256], *p, s[256];
+    int i;
 
-void
-init_sound ()
-{
-  char           *displayname = DisplayString (dp);
-  char            host[256], *p, s[256];
-  int             i;
+    if (audio_on)
+        return;
+    strcpy(host, displayname);
 
-  if (audio_on)
+    if ((p = strrchr(host, (int) ':')) != NULL)
+        *p = 0;
+
+    if (!*host)
+        strcat(host, "localhost");
+
+    printf("Directing sound to: %s\n", host);
+
+    if ((fd = rplay_open(host)) < 0) {
+        rplay_perror(host);
+        return;
+    }
+    audio_on = True;
+    for (i = 0; i < NUM_SOUNDS; i++) {
+        s[0] = 0;
+        strcat(s, SOUNDDIR);
+        if (s[(int) strlen(s) - 1] == '/')
+            FILENAME[i]++;
+        strcat(s, FILENAME[i]);
+        FILENAME[i] = malloc((int) strlen(s) + 1);
+        strcpy(FILENAME[i], s);
+    }
+
     return;
-  strcpy (host, displayname);
+}
 
-  if ((p = strrchr (host, (int) ':')) != NULL)
-    *p = 0;
+static void *p[7];
 
-  if (!*host)
-    strcat (host, "localhost");
+void playSoundFile(char *filename, int volume, void **private) {
+    RPLAY **p = (RPLAY **) private;
 
-  printf ("Directing sound to: %s\n", host);
-
-  if ((fd = rplay_open (host)) < 0)
-    {
-      rplay_perror (host);
-      return;
-    }
-  audio_on = True;
-  for (i = 0; i < NUM_SOUNDS; i++)
-    {
-      s[0] = 0;
-      strcat (s, SOUNDDIR);
-      if (s[(int) strlen (s) - 1] == '/')
-	FILENAME[i]++;
-      strcat (s, FILENAME[i]);
-      FILENAME[i] = malloc ((int) strlen (s) + 1);
-      strcpy (FILENAME[i], s);
+    if (!*p) {
+        printf("loading sound %s\n", filename);
+        *p = rplay_create(RPLAY_PLAY);
+        rplay_set(*p, RPLAY_INSERT, 0, RPLAY_SOUND, strdup(filename), NULL);
     }
 
-
-  return;
-
+    rplay_set(*p, RPLAY_CHANGE, 0, RPLAY_VOLUME, volume, NULL);
+    rplay(fd, *p);
 }
 
-static void    *p[7];
-
-void
-playSoundFile (char *filename, int volume, void **private)
+int play_sound(k) int k;
 {
-  RPLAY         **p = (RPLAY **) private;
+    char c;
 
-
-  if (!*p)
-    {
-      printf ("loading sound %s\n", filename);
-      *p = rplay_create (RPLAY_PLAY);
-      rplay_set (*p, RPLAY_INSERT, 0, RPLAY_SOUND, strdup (filename), NULL);
+    c = k;
+    if (audio_on) {
+        playSoundFile(FILENAME[k], 50, &p[k]);
     }
-
-  rplay_set (*p, RPLAY_CHANGE, 0, RPLAY_VOLUME, volume, NULL);
-  rplay (fd, *p);
-
+    return (0);
 }
 
+void maybe_play_sound(k) int k;
+{}
 
-int
-play_sound (k)
-     int             k;
-{
-  char            c;
+void sound_completed(k) int k;
+{}
 
-  c = k;
-  if (audio_on)
-    {
-      playSoundFile (FILENAME[k], 50, &p[k]);
-    }
-  return (0);
-}
-
-
-void
-maybe_play_sound (k)
-     int             k;
-{
-}
-
-void
-sound_completed (k)
-     int             k;
-{
-}
-
-void
-kill_sound ()
-{
+void kill_sound() {
 }
 #endif
