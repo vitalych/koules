@@ -180,7 +180,7 @@ void control_update(void) {
                         control_state[CLEFT] = 0; // power slider bug hack
                         break;
                     case SDLK_RETURN: // GCW Start button
-                        control_state[CPAUSE] = (event.type == SDL_KEYDOWN) ? 1 : 0;
+                        control_state[CENTER] = (event.type == SDL_KEYDOWN) ? 1 : 0;
                         break;
                     case SDLK_ESCAPE: // GCW Select button
                         control_state[CESCAPE] = (event.type == SDL_KEYDOWN) ? 1 : 0;
