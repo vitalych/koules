@@ -82,16 +82,16 @@ int             DIV = 1;
 int flipping=0,page=0;
 */
 
-int GAMEWIDTH = 640;
-int GAMEHEIGHT = 440;
-int MAPWIDTH = 320;  // for GP2X/dingoo/wiz/gcw
-int MAPHEIGHT = 220; // for GP2X/dingoo/wiz/gcw
+int GAMEWIDTH = 640*4;
+int GAMEHEIGHT = 440*4;
+int MAPWIDTH = 320*4;  // for GP2X/dingoo/wiz/gcw
+int MAPHEIGHT = 220*4; // for GP2X/dingoo/wiz/gcw
 int DIV = 2;         // A pretty obvious guess - DKS
 
 #ifdef SDL32BPP
 // DKS - For SDL initialization on 32bpp platforms
-const int SCREEN_WIDTH = 320;
-const int SCREEN_HEIGHT = 240;
+const int SCREEN_WIDTH = 320*4;
+const int SCREEN_HEIGHT = 240*4;
 const int SCREEN_BPP = 32;
 #else
 // DKS - For SDL initialization on 16bpp platforms
