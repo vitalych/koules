@@ -76,14 +76,14 @@ extern int nomouse;
 #define RAD(n) ((float) (n) / 180.0 * M_PI)
 #define ROTSTEP RAD(10)
 
-#define BALL_RADIUS 8
-#define BBALL_RADIUS 16
-#define APPLE_RADIUS 32
-#define INSPECTOR_RADIUS 14
+#define BALL_RADIUS 8 * 4
+#define BBALL_RADIUS 16 * 4
+#define APPLE_RADIUS 32 * 4
+#define INSPECTOR_RADIUS 14 * 4
 #define LUNATIC_RADIUS EYE_RADIUS
-#define HOLE_RADIUS 12
-#define ROCKET_RADIUS 14
-#define EYE_RADIUS1 10
+#define HOLE_RADIUS 12 * 4
+#define ROCKET_RADIUS 14 * 4
+#define EYE_RADIUS1 10 * 4
 #define SPRINGSIZE (4 * BBALL_RADIUS)
 #define SPRINGSTRENGTH (BBALL_RADIUS / 2)
 
